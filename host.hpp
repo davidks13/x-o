@@ -1,5 +1,5 @@
-#ifndef SERVER_HPP
-#define SERVER_HPP
+#ifndef HOST_HPP
+#define HOST_HPP
 
 #include <iostream>
 #include <string>

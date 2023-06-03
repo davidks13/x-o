@@ -1,3 +1,6 @@
+#ifndef GAME_HPP
+#define GAME_HPP
+
 #include "client.hpp"
 #include "host.hpp"
 #include <iostream>
@@ -22,3 +25,6 @@ class Game{
         Client client;
         std::vector<std::vector<char>> board;
 };
+
+
+#endif

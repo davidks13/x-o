@@ -1,3 +1,6 @@
+#ifndef CLIENT_HPP
+#define CLIENT_HPP
+
 #include <iostream>
 #include <string>
 #include <netdb.h>
@@ -18,3 +21,5 @@ class Client {
         void address_config();
         void connected();
 };
+
+#endif
