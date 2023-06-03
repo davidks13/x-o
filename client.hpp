@@ -9,7 +9,7 @@ class Client {
     public:
         Client();
         ~Client();
-        void launch_client(const char* ip, const int& port_num);
+        void launch_client(const char* ip, const int port_num);
         int get_socket();
     private:
         const char* server_ip;

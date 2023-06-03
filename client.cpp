@@ -6,15 +6,15 @@
 #include <arpa/inet.h>
 
 
-Client::Client(){}
+Client::Client() {}
 
 Client::~Client() {
     close(client_socket);
 }
 
-void Client::launch_client(const char* ip, const int& port_num) {
-    port = port_num;
+void Client::launch_client(const char* ip, const int port_num) {
     server_ip = ip;
+    port = port_num;
     socket_created();
     address_config();
     connected();
@@ -44,7 +44,6 @@ void Client::address_config() {
         exit(0);
     }
 }
-
 
 void Client::connected() {
     status = connect(client_socket, (struct sockaddr*)&server_address, sizeof(server_address));

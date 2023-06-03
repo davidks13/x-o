@@ -6,12 +6,12 @@ Game::Game() : board(std::vector<std::vector<char>>(3, std::vector<char>(3, '~')
 int Game::choose_mode() {
     int mode;
     std::cout << "Are you a client or a host?\n" 
-        << "If client enter : 0, host : 1\n";
+        << "If host enter : 0, client : 1\n";
     std::cin >> mode;
     std::cout << std::endl;
     while(mode != 0 && mode != 1) {
         std::cout << "Enter a valid number!\n"
-            << "If client enter : 0, host : 1\n";
+            << "If host enter : 0, client : 1\n";
         std::cin >> mode;
         std::cout << mode << std::endl;
     }
@@ -19,34 +19,24 @@ int Game::choose_mode() {
     return mode;
 }
 
-
-bool Game::sending(int socket, std::pair<int, int>& coords) {
-    int data_to_send[2];
-    data_to_send[0] = coords.first;
-    data_to_send[1] = coords.second;
-    std::size_t bytes_send = ::send(socket, data_to_send, sizeof(data_to_send), 0);
+bool Game::sending(int socket, int coord) {
+    int buffer = coord;
+    std::size_t bytes_send = send(socket, &buffer, sizeof(buffer), 0);
     if (bytes_send  == -1) {
-        std::cerr << "Receive error: " << strerror(errno) << std::endl;
-        exit(0);
+        std::cerr << "Send error: " << strerror(errno) << std::endl;
+        return false;
     }
     return true;
 }
 
-
-bool Game::receiving(int socket, std::pair<int, int>& received_coords) {
-    int received_data[2];
-    std::size_t bytes_received = recv(socket, received_data, sizeof(received_data), 0);
-    if (bytes_received == -1) {
+int Game::receiving(int socket) {
+    int buffer;
+    std::size_t bytes_received = recv(socket, &buffer, sizeof(buffer), 0);
+    if (bytes_received  == -1) {
         std::cerr << "Receive error: " << strerror(errno) << std::endl;
         exit(0);
     }
-    if (bytes_received != sizeof(received_data)) {
-        std::cerr << "Received incomplete data" << std::endl;
-        exit(0);
-    }
-    received_coords.first = received_data[0];
-    received_coords.second = received_data[1];
-    return true;
+    return buffer;
 }
 
 void Game::host_mode() {
@@ -73,21 +63,25 @@ void Game::client_mode() {
 }
 
 void Game::client_gameplay() {
-    std::pair<int, int> coords;
+    int row{}, col{};
     while(!win_check()) {
         print_board();
-        receiving(client.get_socket(), coords);
-        board[coords.first][coords.second] = 'X';
+        row = receiving(client.get_socket());
+        col = receiving(client.get_socket());
+        std::cout << row << " " << col << std::endl;
+        board[row][col] = 'X';
+        print_board();
 
         while (true) {
             std::cout << "Enter coords 0-2 row\n";
-            std::cin >> coords.first;
+            std::cin >> row;
             std::cout << "Enter coords 0-2 col\n";
-            std::cin >> coords.second;
+            std::cin >> col;
 
-            if (board[coords.first][coords.second] == '~') {
-                board[coords.first][coords.second] = 'O';
-                sending(client.get_socket(), coords);
+            if (board[row][col] == '~') {
+                board[row][col] = 'O';
+                sending(client.get_socket(), row);
+                sending(client.get_socket(), col);
                 break;
             }
         }
@@ -96,24 +90,26 @@ void Game::client_gameplay() {
 }
 
 void Game::host_gameplay() {
-    std::pair<int, int> coords;
+    int row{}, col{};
     while (!win_check()) {
         print_board();
         while (true) {
             std::cout << "Enter coords 0-2 row\n";
-            std::cin >> coords.first;
+            std::cin >> row;
             std::cout << "Enter coords 0-2 col\n";
-            std::cin >> coords.second;
+            std::cin >> col;
 
-            if (board[coords.first][coords.second] == '~') {
-                board[coords.first][coords.second] = 'X';
-                sending(host.get_socket(), coords);
+            if (board[row][col] == '~') {
+                board[row][col]= 'X';
+                sending(host.get_socket(), row);
+                sending(host.get_socket(), col);
                 break;
             } 
         }
 
-        receiving(host.get_socket(), coords);
-        board[coords.first][coords.second] = 'O';
+        row = receiving(host.get_socket());
+        col = receiving(host.get_socket());
+        board[row][col] = 'O';
         std::cout << std::endl;
     }
 }
@@ -182,10 +178,10 @@ bool Game::win_check() {
 void Game::run() {
     int mode = choose_mode();
     if (!mode) {
-        client_mode();
-        client_gameplay();
-    } else {
         host_mode();
         host_gameplay();
+    } else {
+        client_mode();
+        client_gameplay();
     }
 }

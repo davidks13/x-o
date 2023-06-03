@@ -16,8 +16,8 @@ class Game{
         void print_board();
         void client_gameplay();
         void host_gameplay();
-        bool sending(int socket, std::pair<int, int>& coords);
-        bool receiving(int socket, std::pair<int, int>& coords);
+        bool sending(int socket, int coord);
+        int receiving(int socket);
         bool win_check();
     private:
         int port;

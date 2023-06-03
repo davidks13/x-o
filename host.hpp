@@ -15,8 +15,9 @@ class Server {
     public:
         Server();
         ~Server();
-        void launch_server(const int& port_num);
+        void launch_server(const int port_num);
         int get_socket();
+        
     private:
         int port;
         int server_socket;

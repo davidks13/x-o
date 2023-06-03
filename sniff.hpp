@@ -23,6 +23,7 @@ std::string scan_port(const std::string& target, int port) {
 
     if (connect(sock, (struct sockaddr*)&server, sizeof(server)) == 0) {
         std::cout << "Port " << port << " is open" << std::endl;
+        close(sock);
         return target;
     }
 
